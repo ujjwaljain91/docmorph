@@ -5,12 +5,88 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
   Upload, FileText, Download, ArrowLeft, 
-  Check, X, AlertCircle, Zap 
+  Check, X, AlertCircle, Zap, FileImage, 
+  FileSpreadsheet, Presentation, Globe,
+  Sparkles, ArrowRight
 } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 
+// Tool categories with enhanced visual design
+const conversionTools = [
+  {
+    category: "Document Conversion",
+    gradient: "from-blue-500 to-blue-600",
+    tools: [
+      { 
+        name: "PDF to Word", 
+        icon: FileText, 
+        description: "Convert to editable DOC/DOCX format",
+        route: "/pdf-to-word",
+        popular: true,
+        color: "text-blue-500"
+      },
+      { 
+        name: "PDF to Excel", 
+        icon: FileSpreadsheet, 
+        description: "Extract tables and data to spreadsheet",
+        route: "/convert",
+        color: "text-green-500"
+      },
+      { 
+        name: "PDF to PowerPoint", 
+        icon: Presentation, 
+        description: "Convert presentations from PDF",
+        route: "/convert",
+        color: "text-orange-500"
+      },
+    ]
+  },
+  {
+    category: "Image Conversion",
+    gradient: "from-purple-500 to-purple-600",
+    tools: [
+      { 
+        name: "PDF to JPG", 
+        icon: FileImage, 
+        description: "Convert PDF pages to images",
+        route: "/convert",
+        popular: true,
+        color: "text-purple-500"
+      },
+      { 
+        name: "PDF to PNG", 
+        icon: FileImage, 
+        description: "High-quality image conversion",
+        route: "/convert",
+        color: "text-pink-500"
+      },
+    ]
+  },
+  {
+    category: "Web Conversion",
+    gradient: "from-cyan-500 to-cyan-600", 
+    tools: [
+      { 
+        name: "HTML to PDF", 
+        icon: Globe, 
+        description: "Convert web pages to PDF",
+        route: "/convert",
+        color: "text-cyan-500"
+      },
+      { 
+        name: "URL to PDF", 
+        icon: Globe, 
+        description: "Convert any website to PDF",
+        route: "/convert",
+        color: "text-teal-500"
+      },
+    ]
+  }
+];
+
 export const ConversionPage = () => {
   const navigate = useNavigate();
+  const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -74,31 +150,105 @@ export const ConversionPage = () => {
       <Navigation />
       
       <div className="pt-24 pb-12 px-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Enhanced Header */}
+          <div className="mb-12">
             <Button 
               variant="ghost" 
               onClick={() => navigate('/')}
-              className="mb-4 text-muted-foreground hover:text-foreground"
+              className="mb-6 text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Tools
             </Button>
             
             <div className="text-center">
-              <Badge className="mb-4 px-4 py-2 bg-gradient-primary text-white font-medium">
-                PDF Converter
+              <div className="flex justify-center mb-6">
+                <div className="p-4 bg-gradient-primary rounded-2xl shadow-glow">
+                  <Sparkles className="h-12 w-12 text-white" />
+                </div>
+              </div>
+              <Badge className="mb-4 px-6 py-2 bg-gradient-primary text-white font-medium text-sm rounded-full">
+                AI-Powered Conversion
               </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-                Convert Your PDF Files
+              <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
+                Choose Your
+                <span className="block text-gradient bg-gradient-primary bg-clip-text text-transparent">
+                  Conversion Tool
+                </span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Upload your PDF files and convert them to your desired format. 
-                Fast, secure, and completely free.
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                Select the perfect tool for your document transformation needs. 
+                Professional quality, lightning fast, completely free.
               </p>
             </div>
           </div>
+
+          {/* Tool Selection Grid */}
+          {!selectedTool && files.length === 0 && (
+            <div className="mb-12">
+              {conversionTools.map((category, categoryIndex) => (
+                <div key={category.category} className="mb-12 last:mb-0">
+                  {/* Category Header */}
+                  <div className="text-center mb-8">
+                    <div className={`inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r ${category.gradient} text-white font-semibold text-lg mb-4 shadow-elegant`}>
+                      {category.category}
+                    </div>
+                  </div>
+
+                  {/* Tools Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {category.tools.map((tool, toolIndex) => (
+                      <Card 
+                        key={tool.name} 
+                        className="group p-6 cursor-pointer transition-all duration-300 hover:shadow-glow hover:scale-105 border-2 border-transparent hover:border-primary/20 relative overflow-hidden"
+                        onClick={() => {
+                          if (tool.route !== '/convert') {
+                            navigate(tool.route);
+                          } else {
+                            setSelectedTool(tool.name);
+                          }
+                        }}
+                      >
+                        {/* Popular Badge */}
+                        {tool.popular && (
+                          <Badge className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-medium">
+                            Popular
+                          </Badge>
+                        )}
+                        
+                        {/* Tool Icon */}
+                        <div className="flex items-center space-x-4 mb-4">
+                          <div className={`p-4 rounded-xl bg-gradient-to-r ${category.gradient} text-white group-hover:scale-110 transition-transform duration-300`}>
+                            <tool.icon className="h-8 w-8" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-bold text-xl text-foreground group-hover:text-primary transition-colors mb-2">
+                              {tool.name}
+                            </h3>
+                            <p className="text-muted-foreground text-sm leading-relaxed">
+                              {tool.description}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Action Button */}
+                        <div className="flex items-center justify-between mt-6">
+                          <span className="text-sm font-medium text-muted-foreground">
+                            Click to use
+                          </span>
+                          <ArrowRight className="h-5 w-5 text-primary group-hover:translate-x-1 transition-transform duration-300" />
+                        </div>
+                        
+                        {/* Hover Effect Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Upload Area */}
           <Card className="p-8 mb-8 border-2 border-dashed border-border hover:border-primary/50 transition-colors">

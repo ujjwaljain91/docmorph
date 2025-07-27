@@ -122,24 +122,24 @@ export const ToolsGrid = () => {
             <div className="flex flex-wrap justify-center gap-4">
               <Button 
                 size="lg" 
-                onClick={() => navigate('/convert')}
-                className="bg-gradient-primary hover:opacity-90 text-white font-medium px-8 py-3 rounded-full shadow-card"
+                onClick={() => navigate('/pdf-to-word')}
+                className="bg-gradient-primary hover:opacity-90 text-white font-medium px-8 py-3 rounded-full shadow-card hover:shadow-glow transition-all duration-300"
               >
                 PDF to Word
               </Button>
               <Button 
                 size="lg" 
                 variant="outline"
-                onClick={() => navigate('/convert')}
-                className="border-primary/30 text-primary hover:bg-primary/10 font-medium px-8 py-3 rounded-full"
+                onClick={() => navigate('/compress-pdf')}
+                className="border-primary/30 text-primary hover:bg-primary/10 font-medium px-8 py-3 rounded-full transition-all duration-300"
               >
                 Compress PDF
               </Button>
               <Button 
                 size="lg" 
                 variant="outline"
-                onClick={() => navigate('/convert')}
-                className="border-primary/30 text-primary hover:bg-primary/10 font-medium px-8 py-3 rounded-full"
+                onClick={() => navigate('/merge-pdf')}
+                className="border-primary/30 text-primary hover:bg-primary/10 font-medium px-8 py-3 rounded-full transition-all duration-300"
               >
                 Merge PDF
               </Button>
