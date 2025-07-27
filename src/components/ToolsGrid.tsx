@@ -13,12 +13,12 @@ const toolCategories = [
     description: "Transform documents between formats",
     color: "from-blue-500 to-blue-600",
     tools: [
-      { name: "PDF to Word", icon: FileText, description: "Convert PDF to editable DOC/DOCX" },
-      { name: "PDF to Excel", icon: FileSpreadsheet, description: "Extract tables to spreadsheet format" },
-      { name: "PDF to PowerPoint", icon: Presentation, description: "Convert presentations from PDF" },
-      { name: "PDF to JPG", icon: FileImage, description: "Convert PDF pages to images" },
-      { name: "HTML to PDF", icon: Globe, description: "Convert web pages to PDF" },
-      { name: "Word to PDF", icon: Upload, description: "Convert DOC/DOCX to PDF" },
+      { name: "PDF to Word", icon: FileText, description: "Convert PDF to editable DOC/DOCX", route: "/pdf-to-word" },
+      { name: "PDF to Excel", icon: FileSpreadsheet, description: "Extract tables to spreadsheet format", route: "/convert" },
+      { name: "PDF to PowerPoint", icon: Presentation, description: "Convert presentations from PDF", route: "/convert" },
+      { name: "PDF to JPG", icon: FileImage, description: "Convert PDF pages to images", route: "/convert" },
+      { name: "HTML to PDF", icon: Globe, description: "Convert web pages to PDF", route: "/convert" },
+      { name: "Word to PDF", icon: Upload, description: "Convert DOC/DOCX to PDF", route: "/convert" },
     ]
   },
   {
@@ -26,12 +26,12 @@ const toolCategories = [
     description: "Modify and organize your documents",
     color: "from-purple-500 to-purple-600",
     tools: [
-      { name: "Edit PDF", icon: Edit3, description: "Add text, images, and annotations" },
-      { name: "Merge PDF", icon: FileText, description: "Combine multiple PDFs into one" },
-      { name: "Split PDF", icon: Scissors, description: "Separate PDF into pages" },
-      { name: "Rotate PDF", icon: RotateCw, description: "Rotate pages as needed" },
-      { name: "Compress PDF", icon: Archive, description: "Reduce file size efficiently" },
-      { name: "Organize PDF", icon: Settings, description: "Reorder and manage pages" },
+      { name: "Edit PDF", icon: Edit3, description: "Add text, images, and annotations", route: "/convert" },
+      { name: "Merge PDF", icon: FileText, description: "Combine multiple PDFs into one", route: "/merge-pdf" },
+      { name: "Split PDF", icon: Scissors, description: "Separate PDF into pages", route: "/split-pdf" },
+      { name: "Rotate PDF", icon: RotateCw, description: "Rotate pages as needed", route: "/rotate-pdf" },
+      { name: "Compress PDF", icon: Archive, description: "Reduce file size efficiently", route: "/compress-pdf" },
+      { name: "Organize PDF", icon: Settings, description: "Reorder and manage pages", route: "/convert" },
     ]
   },
   {
@@ -39,10 +39,10 @@ const toolCategories = [
     description: "Protect your sensitive documents",
     color: "from-green-500 to-green-600",
     tools: [
-      { name: "Protect PDF", icon: Lock, description: "Add password encryption" },
-      { name: "Unlock PDF", icon: Unlock, description: "Remove password protection" },
-      { name: "Watermark PDF", icon: Image, description: "Add text or image watermarks" },
-      { name: "Digital Signature", icon: FileText, description: "Sign documents electronically" },
+      { name: "Protect PDF", icon: Lock, description: "Add password encryption", route: "/convert" },
+      { name: "Unlock PDF", icon: Unlock, description: "Remove password protection", route: "/convert" },
+      { name: "Watermark PDF", icon: Image, description: "Add text or image watermarks", route: "/watermark-pdf" },
+      { name: "Digital Signature", icon: FileText, description: "Sign documents electronically", route: "/convert" },
     ]
   }
 ];
@@ -96,7 +96,7 @@ export const ToolsGrid = () => {
                         </p>
                         <Button 
                           size="sm" 
-                          onClick={() => navigate('/convert')}
+                          onClick={() => navigate(tool.route || '/convert')}
                           className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary-glow hover:to-secondary-glow text-white font-medium rounded-lg"
                         >
                           Use Tool
