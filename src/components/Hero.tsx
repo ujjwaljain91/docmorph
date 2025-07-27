@@ -28,7 +28,7 @@ export const Hero = () => {
           {/* Main heading */}
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-fade-in-up">
             Transform Your
-            <span className="block text-gradient bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent">
+            <span className="block text-white drop-shadow-lg">
               Documents Instantly
             </span>
           </h1>
@@ -51,7 +51,7 @@ export const Hero = () => {
             <Button 
               variant="outline" 
               size="lg"
-              className="border-white/30 text-white hover:bg-white/10 font-semibold text-lg px-8 py-4 rounded-full backdrop-blur-sm"
+              className="border-white border-2 text-white hover:bg-white hover:text-primary font-semibold text-lg px-8 py-4 rounded-full backdrop-blur-sm transition-all duration-300"
             >
               View All Tools
             </Button>
