@@ -16,15 +16,6 @@ export const Hero = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
         <div className="text-center">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <img 
-              src="/lovable-uploads/acf9480b-6eee-4a55-8e25-81e8a4434f8b.png" 
-              alt="DocMorph Logo" 
-              className="h-20 w-auto floating-animation"
-            />
-          </div>
-
           {/* Main heading */}
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-fade-in-up">
             Transform Your
