@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import { 
   FileText, FileImage, FileSpreadsheet, Presentation, 
   Globe, Download, Upload, Scissors, RotateCw,
@@ -47,6 +48,7 @@ const toolCategories = [
 ];
 
 export const ToolsGrid = () => {
+  const navigate = useNavigate();
   return (
     <div className="py-20 px-6 bg-background">
       <div className="max-w-7xl mx-auto">
@@ -94,6 +96,7 @@ export const ToolsGrid = () => {
                         </p>
                         <Button 
                           size="sm" 
+                          onClick={() => navigate('/convert')}
                           className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary-glow hover:to-secondary-glow text-white font-medium rounded-lg"
                         >
                           Use Tool
@@ -119,6 +122,7 @@ export const ToolsGrid = () => {
             <div className="flex flex-wrap justify-center gap-4">
               <Button 
                 size="lg" 
+                onClick={() => navigate('/convert')}
                 className="bg-gradient-primary hover:opacity-90 text-white font-medium px-8 py-3 rounded-full shadow-card"
               >
                 PDF to Word
@@ -126,6 +130,7 @@ export const ToolsGrid = () => {
               <Button 
                 size="lg" 
                 variant="outline"
+                onClick={() => navigate('/convert')}
                 className="border-primary/30 text-primary hover:bg-primary/10 font-medium px-8 py-3 rounded-full"
               >
                 Compress PDF
@@ -133,6 +138,7 @@ export const ToolsGrid = () => {
               <Button 
                 size="lg" 
                 variant="outline"
+                onClick={() => navigate('/convert')}
                 className="border-primary/30 text-primary hover:bg-primary/10 font-medium px-8 py-3 rounded-full"
               >
                 Merge PDF
