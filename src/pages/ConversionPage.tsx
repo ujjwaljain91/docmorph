@@ -185,7 +185,7 @@ export const ConversionPage = () => {
           </div>
 
           {/* Tool Selection Grid */}
-          {!selectedTool && files.length === 0 && (
+          {!selectedTool && (
             <div className="mb-12">
               {conversionTools.map((category, categoryIndex) => (
                 <div key={category.category} className="mb-12 last:mb-0">
@@ -250,8 +250,21 @@ export const ConversionPage = () => {
             </div>
           )}
 
+          {/* Selected Tool Header */}
+          {selectedTool && !processing && !isComplete && (
+            <div className="mb-8">
+              <div className="text-center">
+                <h2 className="text-3xl font-bold text-foreground mb-4">
+                  {selectedTool}
+                </h2>
+                <p className="text-muted-foreground">Upload your PDF files to get started</p>
+              </div>
+            </div>
+          )}
+
           {/* Upload Area */}
-          <Card className="p-8 mb-8 border-2 border-dashed border-border hover:border-primary/50 transition-colors">
+          {(!selectedTool || files.length === 0) && !processing && !isComplete && (
+            <Card className="p-8 mb-8 border-2 border-dashed border-border hover:border-primary/50 transition-colors">
             <div
               className={`text-center ${dragActive ? 'scale-105' : ''} transition-transform duration-200`}
               onDragEnter={handleDrag}
@@ -264,7 +277,7 @@ export const ConversionPage = () => {
               </div>
               
               <h3 className="text-2xl font-semibold text-foreground mb-4">
-                Drop your PDF files here
+                {selectedTool ? `Upload PDF for ${selectedTool}` : 'Drop your PDF files here'}
               </h3>
               <p className="text-muted-foreground mb-6">
                 or click to browse from your computer
@@ -294,6 +307,7 @@ export const ConversionPage = () => {
               </div>
             </div>
           </Card>
+          )}
 
           {/* File List */}
           {files.length > 0 && (
@@ -334,6 +348,29 @@ export const ConversionPage = () => {
                 ))}
               </div>
             </Card>
+          )}
+
+          {/* Show other tools after file upload when a specific tool is selected */}
+          {selectedTool && files.length > 0 && !processing && !isComplete && (
+            <div className="mb-8">
+              <Card className="p-6 border-primary/20 bg-primary/5">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">
+                    Need a different tool?
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    You can also try these related tools:
+                  </p>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setSelectedTool(null)}
+                    className="border-primary/30 text-primary hover:bg-primary/10"
+                  >
+                    Browse All Tools
+                  </Button>
+                </div>
+              </Card>
+            </div>
           )}
 
           {/* Conversion Options */}

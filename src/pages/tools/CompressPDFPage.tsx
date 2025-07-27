@@ -97,6 +97,19 @@ export const CompressPDFPage = () => {
             onBack={() => navigate('/')}
           />
 
+          {/* Show other tools suggestion after file upload */}
+          {files.length > 0 && !processing && !result && (
+            <div className="mb-8">
+              <Card className="p-4 border-primary/20 bg-primary/5">
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Need a different tool? <a href="/" className="text-primary hover:underline">Browse all PDF tools</a>
+                  </p>
+                </div>
+              </Card>
+            </div>
+          )}
+
           {/* Upload Area */}
           {!processing && !result && (
             <div className="mb-8">
