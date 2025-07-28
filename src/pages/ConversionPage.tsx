@@ -251,7 +251,7 @@ export const ConversionPage = () => {
           )}
 
           {/* Selected Tool Header */}
-          {selectedTool && !processing && !isComplete && (
+          {selectedTool && !isProcessing && !isComplete && (
             <div className="mb-8">
               <div className="text-center">
                 <h2 className="text-3xl font-bold text-foreground mb-4">
@@ -263,7 +263,7 @@ export const ConversionPage = () => {
           )}
 
           {/* Upload Area */}
-          {(!selectedTool || files.length === 0) && !processing && !isComplete && (
+          {(!selectedTool || files.length === 0) && !isProcessing && !isComplete && (
             <Card className="p-8 mb-8 border-2 border-dashed border-border hover:border-primary/50 transition-colors">
             <div
               className={`text-center ${dragActive ? 'scale-105' : ''} transition-transform duration-200`}
@@ -351,7 +351,7 @@ export const ConversionPage = () => {
           )}
 
           {/* Show other tools after file upload when a specific tool is selected */}
-          {selectedTool && files.length > 0 && !processing && !isComplete && (
+          {selectedTool && files.length > 0 && !isProcessing && !isComplete && (
             <div className="mb-8">
               <Card className="p-6 border-primary/20 bg-primary/5">
                 <div className="text-center">
