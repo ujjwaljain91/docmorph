@@ -29,14 +29,14 @@ const conversionTools = [
         name: "PDF to Excel", 
         icon: FileSpreadsheet, 
         description: "Extract tables and data to spreadsheet",
-        route: "/convert",
+        route: "/pdf-to-excel",
         color: "text-green-500"
       },
       { 
         name: "PDF to PowerPoint", 
         icon: Presentation, 
         description: "Convert presentations from PDF",
-        route: "/convert",
+        route: "/pdf-to-powerpoint",
         color: "text-orange-500"
       },
     ]
@@ -49,7 +49,7 @@ const conversionTools = [
         name: "PDF to JPG", 
         icon: FileImage, 
         description: "Convert PDF pages to images",
-        route: "/convert",
+        route: "/pdf-to-jpg",
         popular: true,
         color: "text-purple-500"
       },
@@ -57,7 +57,7 @@ const conversionTools = [
         name: "PDF to PNG", 
         icon: FileImage, 
         description: "High-quality image conversion",
-        route: "/convert",
+        route: "/pdf-to-png",
         color: "text-pink-500"
       },
     ]
@@ -70,14 +70,14 @@ const conversionTools = [
         name: "HTML to PDF", 
         icon: Globe, 
         description: "Convert web pages to PDF",
-        route: "/convert",
+        route: "/html-to-pdf",
         color: "text-cyan-500"
       },
       { 
         name: "URL to PDF", 
         icon: Globe, 
         description: "Convert any website to PDF",
-        route: "/convert",
+        route: "/url-to-pdf",
         color: "text-teal-500"
       },
     ]
@@ -202,13 +202,7 @@ export const ConversionPage = () => {
                       <Card 
                         key={tool.name} 
                         className="group p-6 cursor-pointer transition-all duration-300 hover:shadow-glow hover:scale-105 border-2 border-transparent hover:border-primary/20 relative overflow-hidden"
-                        onClick={() => {
-                          if (tool.route !== '/convert') {
-                            navigate(tool.route);
-                          } else {
-                            setSelectedTool(tool.name);
-                          }
-                        }}
+                        onClick={() => navigate(tool.route)}
                       >
                         {/* Popular Badge */}
                         {tool.popular && (
