@@ -19,4 +19,15 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    target: 'esnext', // Support for top-level await
+    rollupOptions: {
+      output: {
+        format: 'es'
+      }
+    }
+  },
+  optimizeDeps: {
+    include: ['pdfjs-dist']
+  }
 }));
