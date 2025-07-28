@@ -8,8 +8,8 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Set up PDF.js worker - use a more reliable CDN
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+// Set up PDF.js worker - use local worker file to avoid CORS issues
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
 export interface ProcessingProgress {
   progress: number;
