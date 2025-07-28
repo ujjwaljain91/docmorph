@@ -12,12 +12,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { FileSpreadsheet, Zap } from 'lucide-react';
+import { convertPDFToExcel, ProcessingProgress, downloadFile } from '@/utils/pdfUtils';
 
 export const PDFToExcelPage = () => {
   const navigate = useNavigate();
   const [files, setFiles] = useState<File[]>([]);
   const [processing, setProcessing] = useState(false);
-  const [progress, setProgress] = useState({ progress: 0, status: '' });
+  const [progress, setProgress] = useState<ProcessingProgress>({ progress: 0, status: '' });
   const [result, setResult] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,21 +38,8 @@ export const PDFToExcelPage = () => {
     setError(null);
     
     try {
-      // Simulate conversion process
-      setProgress({ progress: 25, status: 'Analyzing PDF structure...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 50, status: 'Extracting tables and data...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 75, status: 'Creating Excel spreadsheet...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 100, status: 'Conversion complete!' });
-      
-      // Create mock Excel file
-      const mockExcel = new Blob(['Mock Excel content'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      setResult(mockExcel);
+      const result = await convertPDFToExcel(files[0], setProgress);
+      setResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Conversion failed');
     } finally {
@@ -62,14 +50,7 @@ export const PDFToExcelPage = () => {
   const handleDownload = () => {
     if (result) {
       const filename = files[0]?.name.replace('.pdf', '.xlsx') || 'converted.xlsx';
-      const url = URL.createObjectURL(result);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      downloadFile(result, filename);
     }
   };
 

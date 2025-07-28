@@ -11,12 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Globe, Zap, Link } from 'lucide-react';
+import { convertURLToPDF, ProcessingProgress, downloadFile } from '@/utils/pdfUtils';
 
 export const URLToPDFPage = () => {
   const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [progress, setProgress] = useState({ progress: 0, status: '' });
+  const [progress, setProgress] = useState<ProcessingProgress>({ progress: 0, status: '' });
   const [result, setResult] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,21 +28,8 @@ export const URLToPDFPage = () => {
     setError(null);
     
     try {
-      // Simulate conversion process
-      setProgress({ progress: 25, status: 'Fetching website...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 50, status: 'Rendering page content...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 75, status: 'Generating PDF...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 100, status: 'Conversion complete!' });
-      
-      // Create mock PDF file
-      const mockPDF = new Blob(['Mock PDF content'], { type: 'application/pdf' });
-      setResult(mockPDF);
+      const result = await convertURLToPDF(url, setProgress);
+      setResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Conversion failed');
     } finally {
@@ -52,14 +40,7 @@ export const URLToPDFPage = () => {
   const handleDownload = () => {
     if (result) {
       const filename = `${new URL(url).hostname}.pdf`;
-      const downloadUrl = URL.createObjectURL(result);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(downloadUrl);
+      downloadFile(result, filename);
     }
   };
 

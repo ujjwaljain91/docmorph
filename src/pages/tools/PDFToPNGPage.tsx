@@ -12,13 +12,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { FileImage, Zap } from 'lucide-react';
+import { convertPDFToPNG, ProcessingProgress, downloadMultipleFiles } from '@/utils/pdfUtils';
 
 export const PDFToPNGPage = () => {
   const navigate = useNavigate();
   const [files, setFiles] = useState<File[]>([]);
   const [processing, setProcessing] = useState(false);
-  const [progress, setProgress] = useState({ progress: 0, status: '' });
-  const [result, setResult] = useState<Blob | null>(null);
+  const [progress, setProgress] = useState<ProcessingProgress>({ progress: 0, status: '' });
+  const [result, setResult] = useState<Blob[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleFilesSelected = (newFiles: File[]) => {
@@ -37,21 +38,8 @@ export const PDFToPNGPage = () => {
     setError(null);
     
     try {
-      // Simulate conversion process
-      setProgress({ progress: 25, status: 'Loading PDF pages...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 50, status: 'Rendering to high-quality images...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 75, status: 'Optimizing PNG transparency...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 100, status: 'Conversion complete!' });
-      
-      // Create mock PNG file
-      const mockPNG = new Blob(['Mock PNG content'], { type: 'image/png' });
-      setResult(mockPNG);
+      const result = await convertPDFToPNG(files[0], setProgress);
+      setResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Conversion failed');
     } finally {
@@ -60,16 +48,25 @@ export const PDFToPNGPage = () => {
   };
 
   const handleDownload = () => {
-    if (result) {
-      const filename = files[0]?.name.replace('.pdf', '.png') || 'converted.png';
-      const url = URL.createObjectURL(result);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+    if (result && result.length > 0) {
+      if (result.length === 1) {
+        const filename = files[0]?.name.replace('.pdf', '.png') || 'converted.png';
+        const url = URL.createObjectURL(result[0]);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        // Download multiple images as ZIP
+        const fileList = result.map((blob, index) => ({
+          blob,
+          filename: `page_${index + 1}.png`
+        }));
+        downloadMultipleFiles(fileList, 'pdf_to_png.zip');
+      }
     }
   };
 

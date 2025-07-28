@@ -13,13 +13,14 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Globe, Zap } from 'lucide-react';
+import { convertHTMLToPDF, ProcessingProgress, downloadFile } from '@/utils/pdfUtils';
 
 export const HTMLToPDFPage = () => {
   const navigate = useNavigate();
   const [files, setFiles] = useState<File[]>([]);
   const [url, setUrl] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [progress, setProgress] = useState({ progress: 0, status: '' });
+  const [progress, setProgress] = useState<ProcessingProgress>({ progress: 0, status: '' });
   const [result, setResult] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,21 +40,18 @@ export const HTMLToPDFPage = () => {
     setError(null);
     
     try {
-      // Simulate conversion process
-      setProgress({ progress: 25, status: 'Loading HTML content...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let htmlContent = '';
       
-      setProgress({ progress: 50, status: 'Rendering web page...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (files.length > 0) {
+        // Read HTML file content
+        htmlContent = await files[0].text();
+      } else {
+        // For URL, we'll create a simple HTML content placeholder
+        htmlContent = `<html><body><h1>URL Content</h1><p>Processing URL: ${url}</p></body></html>`;
+      }
       
-      setProgress({ progress: 75, status: 'Generating PDF...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 100, status: 'Conversion complete!' });
-      
-      // Create mock PDF file
-      const mockPDF = new Blob(['Mock PDF content'], { type: 'application/pdf' });
-      setResult(mockPDF);
+      const result = await convertHTMLToPDF(htmlContent, setProgress);
+      setResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Conversion failed');
     } finally {
@@ -64,14 +62,7 @@ export const HTMLToPDFPage = () => {
   const handleDownload = () => {
     if (result) {
       const filename = url ? 'webpage.pdf' : files[0]?.name.replace('.html', '.pdf') || 'converted.pdf';
-      const downloadUrl = URL.createObjectURL(result);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(downloadUrl);
+      downloadFile(result, filename);
     }
   };
 

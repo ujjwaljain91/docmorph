@@ -12,12 +12,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Presentation, Zap } from 'lucide-react';
+import { convertPDFToPowerPoint, ProcessingProgress, downloadFile } from '@/utils/pdfUtils';
 
 export const PDFToPowerPointPage = () => {
   const navigate = useNavigate();
   const [files, setFiles] = useState<File[]>([]);
   const [processing, setProcessing] = useState(false);
-  const [progress, setProgress] = useState({ progress: 0, status: '' });
+  const [progress, setProgress] = useState<ProcessingProgress>({ progress: 0, status: '' });
   const [result, setResult] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,21 +38,8 @@ export const PDFToPowerPointPage = () => {
     setError(null);
     
     try {
-      // Simulate conversion process
-      setProgress({ progress: 25, status: 'Analyzing PDF pages...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 50, status: 'Converting to slides...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 75, status: 'Creating PowerPoint presentation...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setProgress({ progress: 100, status: 'Conversion complete!' });
-      
-      // Create mock PowerPoint file
-      const mockPPT = new Blob(['Mock PowerPoint content'], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
-      setResult(mockPPT);
+      const result = await convertPDFToPowerPoint(files[0], setProgress);
+      setResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Conversion failed');
     } finally {
@@ -62,14 +50,7 @@ export const PDFToPowerPointPage = () => {
   const handleDownload = () => {
     if (result) {
       const filename = files[0]?.name.replace('.pdf', '.pptx') || 'converted.pptx';
-      const url = URL.createObjectURL(result);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      downloadFile(result, filename);
     }
   };
 

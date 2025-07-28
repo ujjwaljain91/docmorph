@@ -2,6 +2,14 @@
 import { PDFDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
+import * as XLSX from 'xlsx';
+import { Document, Packer, Paragraph, TextRun, ImageRun } from 'docx';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Set up PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 export interface ProcessingProgress {
   progress: number;
@@ -11,7 +19,7 @@ export interface ProcessingProgress {
 
 export type ProgressCallback = (progress: ProcessingProgress) => void;
 
-// PDF to DOCX conversion
+// PDF to DOCX conversion with enhanced text extraction
 export const convertPDFToDocx = async (
   file: File, 
   onProgress?: ProgressCallback
@@ -20,53 +28,410 @@ export const convertPDFToDocx = async (
     onProgress?.({ progress: 10, status: 'Loading PDF...' });
     
     const arrayBuffer = await file.arrayBuffer();
-    const pdfDoc = await PDFDocument.load(arrayBuffer);
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     
     onProgress?.({ progress: 30, status: 'Extracting text...' });
     
-    // Extract text from PDF pages
-    const pages = pdfDoc.getPages();
-    let extractedText = '';
+    const doc = new Document({
+      sections: []
+    });
     
-    for (let i = 0; i < pages.length; i++) {
-      onProgress?.({ progress: 30 + (40 * i / pages.length), status: `Processing page ${i + 1}...` });
-      // Note: pdf-lib doesn't have built-in text extraction
-      // For now, we'll create a placeholder implementation
-      extractedText += `Content from page ${i + 1}\n\n`;
+    const paragraphs: Paragraph[] = [];
+    
+    // Extract text from each page
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      onProgress?.({ progress: 30 + (50 * pageNum / pdf.numPages), status: `Processing page ${pageNum}...` });
+      
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      
+      let pageText = '';
+      textContent.items.forEach((item: any) => {
+        if ('str' in item) {
+          pageText += item.str + ' ';
+        }
+      });
+      
+      if (pageText.trim()) {
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: pageText.trim(),
+                size: 24
+              })
+            ]
+          })
+        );
+        
+        // Add page break except for last page
+        if (pageNum < pdf.numPages) {
+          paragraphs.push(
+            new Paragraph({
+              children: [new TextRun({ text: '', break: 1 })]
+            })
+          );
+        }
+      }
     }
     
-    onProgress?.({ progress: 80, status: 'Creating DOCX...' });
+    onProgress?.({ progress: 80, status: 'Creating DOCX document...' });
     
-    // Create a simple text blob as DOCX (placeholder implementation)
-    const docxContent = new Blob([extractedText], { 
+    const docWithContent = new Document({
+      sections: [{
+        properties: {},
+        children: paragraphs
+      }]
+    });
+    
+    const buffer = await Packer.toBuffer(docWithContent);
+    const blob = new Blob([buffer], { 
       type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
     });
     
     onProgress?.({ progress: 100, status: 'Conversion complete!' });
-    return docxContent;
+    return blob;
     
   } catch (error) {
     throw new Error(`PDF to DOCX conversion failed: ${error}`);
   }
 };
 
-// PDF to Excel conversion
+// Enhanced PDF to Excel conversion
 export const convertPDFToExcel = async (
   file: File,
   onProgress?: ProgressCallback
 ): Promise<Blob> => {
   try {
-    onProgress?.({ progress: 10, status: 'Processing PDF...' });
+    onProgress?.({ progress: 10, status: 'Loading PDF...' });
     
-    // Placeholder implementation
-    const csvContent = 'Column 1,Column 2,Column 3\nData 1,Data 2,Data 3\n';
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    onProgress?.({ progress: 30, status: 'Extracting data...' });
+    
+    const workbook = XLSX.utils.book_new();
+    const worksheetData: string[][] = [];
+    
+    // Add headers
+    worksheetData.push(['Page', 'Content', 'Position']);
+    
+    // Extract text from each page
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      onProgress?.({ progress: 30 + (50 * pageNum / pdf.numPages), status: `Processing page ${pageNum}...` });
+      
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      
+      let rowIndex = 1;
+      textContent.items.forEach((item: any) => {
+        if ('str' in item && item.str.trim()) {
+          worksheetData.push([
+            pageNum.toString(),
+            item.str.trim(),
+            `Row ${rowIndex}`
+          ]);
+          rowIndex++;
+        }
+      });
+    }
+    
+    onProgress?.({ progress: 80, status: 'Creating Excel file...' });
+    
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'PDF Data');
+    
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
     
     onProgress?.({ progress: 100, status: 'Conversion complete!' });
     return blob;
     
   } catch (error) {
     throw new Error(`PDF to Excel conversion failed: ${error}`);
+  }
+};
+
+// PDF to PowerPoint conversion
+export const convertPDFToPowerPoint = async (
+  file: File,
+  onProgress?: ProgressCallback
+): Promise<Blob> => {
+  try {
+    onProgress?.({ progress: 10, status: 'Loading PDF...' });
+    
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    onProgress?.({ progress: 30, status: 'Processing slides...' });
+    
+    // Create PowerPoint-like structure using basic HTML/XML
+    const slides: string[] = [];
+    
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      onProgress?.({ progress: 30 + (50 * pageNum / pdf.numPages), status: `Processing slide ${pageNum}...` });
+      
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      
+      let slideText = '';
+      textContent.items.forEach((item: any) => {
+        if ('str' in item && item.str.trim()) {
+          slideText += item.str + ' ';
+        }
+      });
+      
+      if (slideText.trim()) {
+        slides.push(`Slide ${pageNum}:\n${slideText.trim()}\n\n`);
+      }
+    }
+    
+    onProgress?.({ progress: 80, status: 'Creating PowerPoint file...' });
+    
+    // Create a basic text representation (placeholder for actual PPTX)
+    const pptxContent = slides.join('\n');
+    const blob = new Blob([pptxContent], { 
+      type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' 
+    });
+    
+    onProgress?.({ progress: 100, status: 'Conversion complete!' });
+    return blob;
+    
+  } catch (error) {
+    throw new Error(`PDF to PowerPoint conversion failed: ${error}`);
+  }
+};
+
+// PDF to JPG conversion
+export const convertPDFToJPG = async (
+  file: File,
+  onProgress?: ProgressCallback
+): Promise<Blob[]> => {
+  try {
+    onProgress?.({ progress: 10, status: 'Loading PDF...' });
+    
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    onProgress?.({ progress: 30, status: 'Converting pages to images...' });
+    
+    const images: Blob[] = [];
+    
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      onProgress?.({ progress: 30 + (60 * pageNum / pdf.numPages), status: `Converting page ${pageNum}...` });
+      
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 2.0 });
+      
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      
+      if (context) {
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+        };
+        
+        await page.render(renderContext).promise;
+        
+        // Convert canvas to JPG blob
+        const blob = await new Promise<Blob>((resolve) => {
+          canvas.toBlob((blob) => {
+            resolve(blob!);
+          }, 'image/jpeg', 0.9);
+        });
+        
+        images.push(blob);
+      }
+    }
+    
+    onProgress?.({ progress: 100, status: 'Conversion complete!' });
+    return images;
+    
+  } catch (error) {
+    throw new Error(`PDF to JPG conversion failed: ${error}`);
+  }
+};
+
+// PDF to PNG conversion
+export const convertPDFToPNG = async (
+  file: File,
+  onProgress?: ProgressCallback
+): Promise<Blob[]> => {
+  try {
+    onProgress?.({ progress: 10, status: 'Loading PDF...' });
+    
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    onProgress?.({ progress: 30, status: 'Converting pages to images...' });
+    
+    const images: Blob[] = [];
+    
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      onProgress?.({ progress: 30 + (60 * pageNum / pdf.numPages), status: `Converting page ${pageNum}...` });
+      
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 2.0 });
+      
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      
+      if (context) {
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+        };
+        
+        await page.render(renderContext).promise;
+        
+        // Convert canvas to PNG blob
+        const blob = await new Promise<Blob>((resolve) => {
+          canvas.toBlob((blob) => {
+            resolve(blob!);
+          }, 'image/png');
+        });
+        
+        images.push(blob);
+      }
+    }
+    
+    onProgress?.({ progress: 100, status: 'Conversion complete!' });
+    return images;
+    
+  } catch (error) {
+    throw new Error(`PDF to PNG conversion failed: ${error}`);
+  }
+};
+
+// HTML to PDF conversion
+export const convertHTMLToPDF = async (
+  htmlContent: string,
+  onProgress?: ProgressCallback
+): Promise<Blob> => {
+  try {
+    onProgress?.({ progress: 10, status: 'Processing HTML...' });
+    
+    // Create a temporary element to render HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-9999px';
+    tempDiv.style.width = '210mm'; // A4 width
+    document.body.appendChild(tempDiv);
+    
+    onProgress?.({ progress: 40, status: 'Rendering content...' });
+    
+    // Use html2canvas to capture the content
+    const canvas = await html2canvas(tempDiv, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true
+    });
+    
+    onProgress?.({ progress: 70, status: 'Creating PDF...' });
+    
+    // Create PDF with jsPDF
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = 210; // A4 width in mm
+    const pageHeight = 295; // A4 height in mm
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    
+    let position = 0;
+    
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    
+    // Clean up
+    document.body.removeChild(tempDiv);
+    
+    onProgress?.({ progress: 90, status: 'Finalizing PDF...' });
+    
+    const pdfBlob = pdf.output('blob');
+    
+    onProgress?.({ progress: 100, status: 'Conversion complete!' });
+    return pdfBlob;
+    
+  } catch (error) {
+    throw new Error(`HTML to PDF conversion failed: ${error}`);
+  }
+};
+
+// URL to PDF conversion
+export const convertURLToPDF = async (
+  url: string,
+  onProgress?: ProgressCallback
+): Promise<Blob> => {
+  try {
+    onProgress?.({ progress: 10, status: 'Fetching webpage...' });
+    
+    // Create an iframe to load the URL
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '1200px';
+    iframe.style.height = '800px';
+    iframe.src = url;
+    
+    document.body.appendChild(iframe);
+    
+    // Wait for the iframe to load
+    await new Promise((resolve, reject) => {
+      iframe.onload = resolve;
+      iframe.onerror = reject;
+      setTimeout(() => reject(new Error('Timeout loading URL')), 30000);
+    });
+    
+    onProgress?.({ progress: 40, status: 'Rendering webpage...' });
+    
+    // Wait a bit more for dynamic content to load
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Capture the iframe content
+    const canvas = await html2canvas(iframe.contentDocument?.body || document.body, {
+      scale: 1,
+      useCORS: true,
+      allowTaint: true
+    });
+    
+    onProgress?.({ progress: 70, status: 'Creating PDF...' });
+    
+    // Create PDF
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = 210;
+    const pageHeight = 295;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    
+    // Clean up
+    document.body.removeChild(iframe);
+    
+    onProgress?.({ progress: 90, status: 'Finalizing PDF...' });
+    
+    const pdfBlob = pdf.output('blob');
+    
+    onProgress?.({ progress: 100, status: 'Conversion complete!' });
+    return pdfBlob;
+    
+  } catch (error) {
+    throw new Error(`URL to PDF conversion failed: ${error}`);
   }
 };
 
