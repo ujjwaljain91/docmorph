@@ -335,14 +335,14 @@ export const ConversionPage = () => {
                   Choose PDF Files
                 </Button>
                 
-                <input
-                  id="file-upload"
-                  type="file"
-                  multiple
-                  accept=".pdf,application/pdf"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
+                    <input
+                      id="file-upload"
+                      type="file"
+                      multiple
+                      accept="application/pdf"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
                 
                 <p className="text-sm text-muted-foreground">
                   Supports PDF files up to 100MB • Completely secure and private

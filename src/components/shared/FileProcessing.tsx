@@ -21,7 +21,7 @@ interface FileUploadZoneProps {
 
 export const FileUploadZone: React.FC<FileUploadZoneProps> = ({
   onFilesSelected,
-  acceptedFileTypes = ['.pdf', 'application/pdf'],
+  acceptedFileTypes = ['application/pdf'],
   maxFiles = 10,
   multiple = true,
   title = 'Drop your PDF files here',
@@ -31,12 +31,25 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({
     onFilesSelected(acceptedFiles);
   }, [onFilesSelected]);
 
+  // Create proper accept object for dropzone
+  const acceptConfig = acceptedFileTypes.reduce((acc, type) => {
+    if (type.startsWith('.')) {
+      // Handle file extensions by converting to MIME type
+      const mimeType = type === '.pdf' ? 'application/pdf' : 
+                     type === '.html' ? 'text/html' :
+                     type === '.htm' ? 'text/html' :
+                     'application/octet-stream';
+      acc[mimeType] = [type];
+    } else {
+      // Handle MIME types directly
+      acc[type] = [];
+    }
+    return acc;
+  }, {} as Record<string, string[]>);
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: acceptedFileTypes.reduce((acc, type) => {
-      acc[type] = [];
-      return acc;
-    }, {} as Record<string, string[]>),
+    accept: acceptConfig,
     maxFiles,
     multiple
   });
