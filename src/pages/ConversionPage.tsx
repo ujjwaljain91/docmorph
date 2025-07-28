@@ -184,7 +184,56 @@ export const ConversionPage = () => {
             </div>
           </div>
 
-          {/* Tool Selection Grid */}
+          {/* Upload Area - NOW COMES FIRST */}
+          {!selectedTool && (
+            <div className="mb-12">
+              <Card className="p-8 mb-8 border-2 border-dashed border-border hover:border-primary/50 transition-colors">
+                <div
+                  className={`text-center ${dragActive ? 'scale-105' : ''} transition-transform duration-200`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                >
+                  <div className={`inline-flex p-6 rounded-full mb-6 ${dragActive ? 'bg-primary text-white' : 'bg-primary/10 text-primary'} transition-colors duration-200`}>
+                    <Upload className="h-12 w-12" />
+                  </div>
+                  
+                  <h3 className="text-2xl font-semibold text-foreground mb-4">
+                    Drop your PDF files here
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    or click to browse from your computer
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <Button 
+                      size="lg"
+                      className="bg-gradient-primary hover:opacity-90 text-white font-medium px-8 py-3 rounded-full"
+                      onClick={() => document.getElementById('file-upload')?.click()}
+                    >
+                      Choose PDF Files
+                    </Button>
+                    
+                    <input
+                      id="file-upload"
+                      type="file"
+                      multiple
+                      accept=".pdf,application/pdf"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    
+                    <p className="text-sm text-muted-foreground">
+                      Supports PDF files up to 100MB • Completely secure and private
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Tool Selection Grid - NOW COMES AFTER UPLOAD */}
           {!selectedTool && (
             <div className="mb-12">
               {conversionTools.map((category, categoryIndex) => (
@@ -257,7 +306,7 @@ export const ConversionPage = () => {
           )}
 
           {/* Upload Area */}
-          {(!selectedTool || files.length === 0) && !isProcessing && !isComplete && (
+          {(!selectedTool || files.length === 0) && !isProcessing && !isComplete && selectedTool && (
             <Card className="p-8 mb-8 border-2 border-dashed border-border hover:border-primary/50 transition-colors">
             <div
               className={`text-center ${dragActive ? 'scale-105' : ''} transition-transform duration-200`}
