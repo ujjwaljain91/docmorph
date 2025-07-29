@@ -164,16 +164,16 @@ export const ConversionPage = () => {
             
             <div className="text-center">
               <div className="flex justify-center mb-6">
-                <div className="p-4 bg-gradient-primary rounded-2xl shadow-glow">
+                <div className="p-4 bg-gradient-to-r from-primary to-secondary rounded-2xl shadow-glow">
                   <Sparkles className="h-12 w-12 text-white" />
                 </div>
               </div>
-              <Badge className="mb-4 px-6 py-2 bg-gradient-primary text-white font-medium text-sm rounded-full">
+              <Badge className="mb-4 px-6 py-2 bg-gradient-to-r from-primary to-secondary text-white font-medium text-sm rounded-full">
                 AI-Powered Conversion
               </Badge>
               <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
                 Choose Your
-                <span className="block text-gradient bg-gradient-primary bg-clip-text text-transparent">
+                <span className="block text-gradient">
                   Conversion Tool
                 </span>
               </h1>
@@ -209,7 +209,7 @@ export const ConversionPage = () => {
                   <div className="space-y-4">
                     <Button 
                       size="lg"
-                      className="bg-gradient-primary hover:opacity-90 text-white font-medium px-8 py-3 rounded-full"
+                      className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-medium px-8 py-3 rounded-full"
                       onClick={() => document.getElementById('file-upload')?.click()}
                     >
                       Choose PDF Files
@@ -329,7 +329,7 @@ export const ConversionPage = () => {
               <div className="space-y-4">
                 <Button 
                   size="lg"
-                  className="bg-gradient-primary hover:opacity-90 text-white font-medium px-8 py-3 rounded-full"
+                  className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-medium px-8 py-3 rounded-full"
                   onClick={() => document.getElementById('file-upload')?.click()}
                 >
                   Choose PDF Files
@@ -445,7 +445,7 @@ export const ConversionPage = () => {
               <Button 
                 onClick={handleConvert}
                 size="lg"
-                className="w-full bg-gradient-primary hover:opacity-90 text-white font-semibold py-4 rounded-full"
+                className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-semibold py-4 rounded-full"
               >
                 <Zap className="h-5 w-5 mr-2" />
                 Convert Files Now
@@ -482,7 +482,7 @@ export const ConversionPage = () => {
               <div className="space-y-3">
                 <Button 
                   size="lg"
-                  className="bg-gradient-primary hover:opacity-90 text-white font-semibold px-8 py-3 rounded-full"
+                  className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-semibold px-8 py-3 rounded-full"
                 >
                   <Download className="h-5 w-5 mr-2" />
                   Download All Files
